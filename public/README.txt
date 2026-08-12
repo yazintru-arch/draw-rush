@@ -1,0 +1,1 @@
+This directory is intentionally empty; the application does not require public static assets.

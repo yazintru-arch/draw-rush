@@ -1,16 +1,49 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DRAW RUSH — لعبة الرسم والتخمين</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-game-bg text-white font-cairo overflow-x-hidden">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+import { useCallback, useEffect } from 'react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import { useGame } from '../store/gameStore';
+import type { GameScreen } from '../types';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function useGameState() {
+  const { state, dispatch } = useGame();
+
+  const navigate = useCallback((screen: GameScreen) => {
+    dispatch({ type: 'SET_SCREEN', screen });
+  }, [dispatch]);
+
+  const startTimer = useCallback(() => {
+    dispatch({ type: 'START_TIMER' });
+  }, [dispatch]);
+
+  const stopTimer = useCallback(() => {
+    dispatch({ type: 'STOP_TIMER' });
+  }, [dispatch]);
+
+  const resetTimer = useCallback((seconds: number) => {
+    dispatch({ type: 'SET_TIMER', timer: seconds });
+  }, [dispatch]);
+
+  return {
+    state,
+    dispatch,
+    navigate,
+    startTimer,
+    stopTimer,
+    resetTimer,
+  };
+}
+
+export function useTimerEffect(callback: () => void, deps: readonly unknown[] = []) {
+  const { state } = useGame();
+
+  useEffect(() => {
+    if (state.timer === 0 && state.isTimerRunning) {
+      callback();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.timer, state.isTimerRunning, ...deps]);
+}
